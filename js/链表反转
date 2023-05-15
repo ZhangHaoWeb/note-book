@@ -1,0 +1,63 @@
+#### js 链表反转
+``` js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    let prev, current, next;
+    
+    prev = null;
+    current = head;
+
+    while(current != null) {
+        next = current.next
+        current.next = prev;
+
+        prev = current;
+        current = next;
+    }
+
+    return prev;
+};
+```
+
+#### php 链表反转
+``` php
+/**
+ * Definition for a singly-linked list.
+ * class ListNode {
+ *     public $val = 0;
+ *     public $next = null;
+ *     function __construct($val) { $this->val = $val; }
+ * }
+ */
+class Solution {
+
+    /**
+     * @param ListNode $head
+     * @return ListNode
+     */
+    function reverseList($head) {
+        $prev = null;
+        $current = $head;
+
+        while($current != null) {
+            $next = $current->next;
+            $current->next = $prev;
+
+            $prev = $current;
+            $current = $next;
+        }
+
+        return $prev;
+    }
+}
+```
