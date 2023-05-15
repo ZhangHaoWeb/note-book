@@ -62,7 +62,7 @@ var twoSum = function(numbers, target) {
     }
 };
 ```
-#####
+##### 方法三
 ```js
 /**
  * @param {number[]} numbers
