@@ -43,3 +43,36 @@ var numSubarrayProductLessThanK = function(nums, k) {
     return ans
 };
 ```
+
+#### `chatgpt`给出的答案
+我们使用滑动窗口的思想来解决问题。定义一个左指针 left 和一个右指针 right，并用变量 product 记录当前窗口内所有元素的乘积。初始时，将左指针和右指针都指向数组的起始位置，将乘积 product 初始化为 1。
+
+然后，通过移动右指针来扩展窗口，每次将右指针指向的元素乘到 product 上，并检查当前乘积是否大于等于 k。如果大于等于 k，则需要移动左指针缩小窗口，同时将窗口内最左边的元素从乘积中除去，直到乘积小于 k。在每次移动右指针时，可以计算窗口内连续子数组的数目，并累加到结果变量 count 上。
+
+最后返回 count 即为所求。
+
+```js
+function numSubarrayProductLessThanK(nums, k) {
+  if (k <= 1) {
+    return 0;
+  }
+
+  const n = nums.length;
+  let left = 0;
+  let product = 1;
+  let count = 0;
+
+  for (let right = 0; right < n; right++) {
+    product *= nums[right];
+
+    while (product >= k) {
+      product /= nums[left];
+      left++;
+    }
+
+    count += right - left + 1;
+  }
+
+  return count;
+}
+```
