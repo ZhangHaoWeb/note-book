@@ -9,7 +9,7 @@
 输出：[5]
 
 
-#####方法一 我当时也是这个思路
+##### 方法一 我当时也是这个思路
 - 查找leftNode和前一个节点prev
 - 查找rightNode和后一个节点next
 - 切断链表 反转[left, right]
@@ -70,3 +70,8 @@ const reverseLinkedList = (head) => {
     }
 }
 ```
+
+##### 方法二 不用反转区间节点
+- 找到leftNode和前一个节点prev
+- 从leftNode循环往后查找，prev.next = leftNode.next, leftNode.next.next = leftNode
+- 重复上一步，区间内的节点都插入到prev的后面
