@@ -26,9 +26,9 @@ var permuteUnique = function(nums) {
     const used = new Array(nums.length).fill(false);
 
     function backtrack(path) {
-        // console.log(path);
         if (path.length == nums.length) {
             ans.push([...path])
+            return
         }
 
         const visited = new Set(); 
