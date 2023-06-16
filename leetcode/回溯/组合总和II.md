@@ -24,3 +24,46 @@ candidates 中的每个数字在每个组合中只能使用 一次 。
     [5]
 ]
 ```
+
+```js
+/**
+ * @param {number[]} candidates
+ * @param {number} target
+ * @return {number[][]}
+ */
+var combinationSum2 = function(candidates, target) {
+    const result = []
+    const path = []
+    candidates.sort((a, b) => a - b)
+
+    function backtrack(start, sum) {
+        if (sum == target) {
+           result.push([...path])
+           return
+        }
+
+        for (let i = start; i < candidates.length; i++) {
+            // [ 1, 1,  2, 5, 6, 7, 10]
+            // 当前元素和前一个元素相等 
+            // i > start 有点难理解
+            if(i > start && candidates[i] === candidates[i- 1]){
+                continue;
+            }
+               
+            sum += candidates[i]
+            if (sum > target) {
+                sum -= candidates[i]
+                break
+            }
+
+            path.push(candidates[i])
+            backtrack(i + 1, sum)
+            path.pop()
+            sum -= candidates[i]
+        }
+    }
+
+    backtrack(0, 0)
+    return result
+};
+```
