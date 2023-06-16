@@ -45,7 +45,7 @@ var combinationSum2 = function(candidates, target) {
         for (let i = start; i < candidates.length; i++) {
             // [ 1, 1,  2, 5, 6, 7, 10]
             // 当前元素和前一个元素相等 
-            // i > start 有点难理解
+            // i > start 有点难理解 筛选第一次的循环，递归里面不做筛选
             if(i > start && candidates[i] === candidates[i- 1]){
                 continue;
             }
