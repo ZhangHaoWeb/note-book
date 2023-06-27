@@ -158,6 +158,8 @@ export function defineReactive(
   shallow?: boolean,
   mock?: boolean
 ) {
+    // 这句关系到vue的依赖收集，在之后的依赖收集里讲
+    const dep = new Dep()
     ...
 
     Object.defineProperty(obj, key, {
