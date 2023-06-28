@@ -8,6 +8,14 @@
 
 依赖收集会有点绕，先回忆一下，在对data的每一个属性调用 `defineReactive`的时候，该函数的第一句就是, 大概流程是如下这样的
 ```js
+// src/core/observer/index.ts
+// Observer类构造函数中的一段代码,value是data对象，遍历每一个属性调用 defineReactive
+const keys = Object.keys(value)
+for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    defineReactive(value, key, NO_INITIAL_VALUE, undefined, shallow, mock)
+}
+
 export function defineReactive(){
     const dep = new Dep()
 
@@ -232,4 +240,124 @@ run() {
     ...
     this.cb.call(this.vm, value, oldValue)
 }
+```
+
+##### 总结
+顺着代码我们了解到了vue如何做的依赖收集，再来整体捋一下流程
+```bash
+# 响应式流程
+1. data的每一个属性都调用了`defineReactive`，函数内又使用 `Object.defineProperty` 来监听属性的get/set
+2. 同时在 `defineReactive` 内创建了dep， `const dep = new Dep()`
+3. 对每一个属性的get调用了 `dep.depend()`, set调用了 `dep.notify()`
+```
+
+那么好~  是不是说只有在get的时候做了依赖收集，也就是只有视图有用到的数据，并不是整个data，试想一下data里定义了但是视图没有用的呢
+
+再看来这个 `dep.depend()` ， 里面有个判断是 `if (Dep.target) {}`, 否则不会做依赖收集， `Dep.target`是什么？
+上面其实详细的分析了，挑重点再说一次，挑重点再说一次，挑重点再说一次！
+
+```bash
+# Dep和Watcher
+1. new Vue() 调用了 _init初始化函数
+2、_init 在最后调用了 $mount 挂载函数，该函数是在所有的 mixin 和 initGlobalAPI 后面在Vue原型上添加的挂载函数
+3. $mount 调用 mountComponent函数
+4. mountComponent 函数内部有 new Watcher， Watcher类在构造函数最后调用了自身的 get方法
+5. get方法的第一句是 pushTarget(this)
+6. pushTarget是Dep类到处的函数， 接受到的参数是target
+7. Dep.target = target， target也就是第4步创建的watcher
+```
+
+这里有一个问题思考一下 `_init`中的执行顺序如下
+```js
+// _init 函数中的代码
+...
+initState(vm)
+...
+if (vm.$options.el) {
+    vm.$mount(vm.$options.el)
+}
+
+##### mountComponent
+```
+从上面可以看出，先做的依赖收集，但是 `Dep.target`还不存在，因为还没执行 `$mount`，那第一次的依赖收集到底发生的哪里?
+在第一次渲染的时候 `$mount` 调用了 `mountComponent` 大致代码如下：
+```js
+function mountComponent(vm, el) {
+  // ...一些前置处理逻辑
+
+  // 创建渲染 watcher
+  const updateComponent = () => {
+    // 渲染逻辑
+    vm._update(vm._render(), hydrating);
+  };
+
+  // 实例化渲染 watcher
+  new Watcher(vm, updateComponent, noop, {
+    before() {
+      // ...一些 before 钩子的处理逻辑
+    }
+  });
+
+  // 调用 beforeMount 钩子函数
+  callHook(vm, 'beforeMount');
+
+  // 执行组件的初始化渲染和后续更新
+  vm._update(vm._render());
+
+  // 调用 mounted 钩子函数
+  callHook(vm, 'mounted');
+}
+```
+updateComponent 函数中。在该函数中，会调用 vm._render 方法生成虚拟 DOM，并将其传递给 vm._update 方法进行实际的 DOM 更新。在 vm._update 方法中，会使用 patch 函数对比新旧虚拟 DOM，然后进行 DOM 的创建、更新或删除操作。
+
+##### vm._render
+```js
+Vue.prototype._render = function() {
+  const vm = this;
+  const { render } = vm.$options; // 获取组件的 render 方法
+  let vnode;
+  
+  // 调用 render 方法创建虚拟节点
+  try {
+    vnode = render.call(vm, vm.$createElement);
+  } catch (error) {
+    // 错误处理逻辑
+  }
+  
+  return vnode;
+};
+```
+
+```js
+// Vue 构造函数
+function Vue(options) {
+  // ...
+
+  // 初始化渲染相关的属性和方法
+  this._initRender();
+
+  // ...
+
+  // 如果用户定义了 render 方法，则将其作为 $createElement 方法
+  if (options.render) {
+    this.$createElement = options.render;
+  }
+
+  // ...
+
+  // 调用生命周期钩子函数
+  this._callHook('beforeCreate');
+
+  // ...
+}
+
+// 初始化渲染相关的属性和方法
+Vue.prototype._initRender = function() {
+  // ...
+
+  // 绑定 $createElement 方法到 Vue 实例上
+  this.$createElement = this._createElement;
+
+  // ...
+};
 ```

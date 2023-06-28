@@ -80,3 +80,8 @@ export default Vue as unknown as GlobalAPI
 当用new Vue()实例化的时候， 调用了 `this._init(options)`， `_init` 函数在哪里定义的呢？通过上面的表格可以看出来在 `initMixin` 中定义的 `_init`
 
 [Vue构造函数中的init](./Vue%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%AD%E7%9A%84init.md)
+
+
+mountComponent
+callHook(vm, 'beforeMount')
+vm.$emit('hook:' + hook)
