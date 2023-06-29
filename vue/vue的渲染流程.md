@@ -113,6 +113,16 @@ Vue.prototype._render = function (): VNode {
 来回答一开始的问题 `_render`是哪来的? 上面的代码段里其实有的嘛~
 ```js
 // src/platforms/web/runtime-with-compiler.ts
+let template = options.template
+// template存在的时候取template，不存在的时候取el的outerHTML
+if (template) {
+  // ...
+} else if (el) {
+  // @ts-expect-error
+  template = getOuterHTML(el)
+}
+
+// 将template编译成render函数，这里会有render以及staticRenderFns两个返回，这是vue的编译时优化，static静态不需要在VNode更新时进行patch，优化性能
 const { render, staticRenderFns } = compileToFunctions(
   template,
   {
@@ -126,6 +136,24 @@ const { render, staticRenderFns } = compileToFunctions(
 )
 options.render = render
 options.staticRenderFns = staticRenderFns
+```
+`$mount` 将template进行 `compileToFunctions` 得到 `render` 以及 `staticRenderFns`, 且赋值到当前实例的 `$options`
+
+##### 关于 template
+template会被编译成AST（abstract syntax tree），来看一下 `getOuterHTML`的实现
+
+```js
+// src/platforms/web/runtime-with-compiler.ts
+function getOuterHTML(el: Element): string {
+  if (el.outerHTML) {
+    return el.outerHTML
+  } else {
+    const container = document.createElement('div')
+    container.appendChild(el.cloneNode(true))
+    return container.innerHTML
+  }
+}
+Vue.compile = compileToFunctions
 ```
 
 
