@@ -139,21 +139,8 @@ options.staticRenderFns = staticRenderFns
 ```
 `$mount` 将template进行 `compileToFunctions` 得到 `render` 以及 `staticRenderFns`, 且赋值到当前实例的 `$options`
 
-##### 关于 template
-template会被编译成AST（abstract syntax tree），来看一下 `getOuterHTML`的实现
+<font color=red>这里牵扯出了两个东西 `template` 和 `compileToFunctions`</font>
+[vue的 template 和 compileToFunctions](./vue%E7%9A%84template%E5%92%8CcompileToFunctions.md)
 
-```js
-// src/platforms/web/runtime-with-compiler.ts
-function getOuterHTML(el: Element): string {
-  if (el.outerHTML) {
-    return el.outerHTML
-  } else {
-    const container = document.createElement('div')
-    container.appendChild(el.cloneNode(true))
-    return container.innerHTML
-  }
-}
-Vue.compile = compileToFunctions
-```
 
 
