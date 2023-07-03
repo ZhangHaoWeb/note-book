@@ -82,5 +82,13 @@ export function createCompileToFunctionFn(compile: Function): Function {
 
 ```
 好吧！上面有点乱😈
-1. createCompilerCreator 返回了 createCompiler, 参数是 baseOptions
-2. createCompiler 返回了 compile 和 compileToFunctions， 参数是 template 和 options
+1. compileToFunctions 是由createCompiler 返回的，同时还有一个 compile， 参数是 baseOptions
+2. createCompiler 是由 createCompilerCreator 返回的函数，该概述的参数是 baseCompile
+3. 执行 createCompiler，其内部主要流程如下
+    - 定义了 compile 函数， 内部可以获取 baseOptions 和 baseCompile
+    - 又执行了 createCompileToFunctionFn(compile)，得到compileToFunctions
+    - 返回 compile 和 compileToFunctions
+
+这里用了一些闭包，在 `createCompiler` 内部可以获取 `baseCompile` 和 `baseOptions`
+
+##### baseOptions
