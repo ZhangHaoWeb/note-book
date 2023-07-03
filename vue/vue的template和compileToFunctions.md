@@ -167,6 +167,7 @@ export const canBeLeftOpenTag = makeMap(
 ##### parse 
 vue中的抽象语法树AST的编译，compile中除了合并options以外，关键的是调用了 `baseCompile`
 ```js
+// src/compiler/index.ts
 function baseCompile (
   template: string,
   options: CompilerOptions
@@ -184,5 +185,42 @@ function baseCompile (
   }
 }
 ```
+
+`parse` 函数的主要结构如下
+```js
+// src/compiler/parser/index.ts
+export function parse (
+  template: string,
+  options: CompilerOptions
+): ASTElement | void {
+  // ...
+
+  parseHTML(template, {
+    warn,
+    expectHTML: options.expectHTML,
+    isUnaryTag: options.isUnaryTag,
+    canBeLeftOpenTag: options.canBeLeftOpenTag,
+    shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
+    shouldKeepComment: options.comments,
+    start (tag, attrs, unary) {
+      // ...
+    },
+    end () {
+      // ...
+    },
+    chars (text: string) {
+      // ...
+    },
+    comment (text: string) {
+      // ...
+    }
+  })
+  return root
+}
+```
+
+##### parseHTML & html-parser.ts
+从顶部注释里看到，是基于 John Resig 的开源项目, http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
 
 
